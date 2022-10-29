@@ -59,13 +59,17 @@ public class Lexer {
 		}
 		String name = this.text.substring(fromPos, this.pos);
 		
-		if(name == "IF")
+		if(name.equals("if"))
 			return new Token(TokenType.IF);
+		else if(name.equals("and"))
+			return new Token(TokenType.AND);
+		else if(name.equals("or"))
+			return new Token(TokenType.OR);
 		else if(name.equalsIgnoreCase("True"))
 			return new Token(TokenType.BOOL, true);
 		else if(name.equalsIgnoreCase("False"))
 			return new Token(TokenType.BOOL, false);
-		else if(name == "while")
+		else if(name.equals("while"))
 			return new Token(TokenType.WHILE);
 		return new Token(TokenType.VAR, (String)name);
 	}
@@ -92,13 +96,19 @@ public class Lexer {
 		return (this.text.charAt(this.pos+1));
 	}
 	
-	public Token get_nextToken() {
+	public Token get_nextToken() throws LexerError {
+		char currentCh; 
 		while (this.pos < this.length) {
-			if(Character.isSpaceChar(this.text.charAt(this.pos))) {
+			currentCh = this.text.charAt(this.pos);
+			if(currentCh == '\n') {
+				pos++;
+				return new Token(TokenType.NEWLINE);
+			}
+			if(Character.isWhitespace(currentCh)) {
 				pos++;
 				continue;
 			}
-			if(Character.isDigit(this.text.charAt(this.pos))) {
+			if(Character.isDigit(currentCh)) {
 				return _number();
 			}
 			switch(this.text.charAt(this.pos)) {
@@ -120,6 +130,12 @@ public class Lexer {
 				case ')':
 					this.pos++;
 					return new Token(TokenType.CLOSEPARN);
+				case ';':
+					this.pos++;
+					return new Token(TokenType.SEMICOLON);
+				case ':':
+					this.pos++;
+					return new Token(TokenType.COLON);
 				case '{':
 					this.pos++;
 					return new Token(TokenType.OPENBRACE);
@@ -134,6 +150,14 @@ public class Lexer {
 					}
 					this.pos++;
 					return new Token(TokenType.EQUAL);
+				case '!':
+					
+					if(peek() == '=') {
+						this.pos+=2;
+						return new Token(TokenType.NOTEQUAL);
+					}
+					this.pos++;
+					return new Token(TokenType.NOT);
 				case '<':
 					
 					if(peek() == '=') {
@@ -159,8 +183,9 @@ public class Lexer {
 				return _id();
 			}
 			
-			System.out.println("Reached end of lexer returning EOF");;
-			return new Token(TokenType.EOF, "EOF");
+			throw new LexerError("Unknown token "+currentCh);
+			//System.out.println("Reached end of lexer returning EOF");
+			//return new Token(TokenType.EOF, "EOF");
 			
 		}
 		return new Token(TokenType.EOF, "EOF");

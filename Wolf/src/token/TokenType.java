@@ -13,12 +13,16 @@ public enum TokenType {
     SEMICOLON(";"),
     PERIOD("."),
     
+    NOT("!"),
     EQUALEQUAL("=="),
 	NOTEQUAL("!="),
 	LESS("<"),
 	LESSEQUAL("<="),
 	GREATER(">"),
 	GREATEREQUAL(">="),
+	AND("and"),
+	OR("or"),
+	NEWLINE("\\n"),
     
     OPENPARN("("),
     CLOSEPARN(")"),

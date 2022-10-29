@@ -152,4 +152,24 @@ public class WolfObj {
 			return new WolfObj(TokenType.NONE);
 		}
 	}
+	
+	public WolfObj and(WolfObj t) {
+		if(this.type == TokenType.BOOL && t.get_type() == TokenType.BOOL) {
+			return new WolfObj(TokenType.BOOL, (boolean)this.value && (boolean)t.get_value());
+		}
+		return new WolfObj(TokenType.NONE);
+	}
+	public WolfObj not() {
+		if(this.type == TokenType.BOOL) {
+			return new WolfObj(TokenType.BOOL, !((boolean)this.value));
+		}
+		//System.out.println()
+		return new WolfObj(TokenType.NONE);
+	}
+	public WolfObj or(WolfObj t) {
+		if(this.type == TokenType.BOOL && t.get_type() == TokenType.BOOL) {
+			return new WolfObj(TokenType.BOOL, (boolean)this.value || (boolean)t.get_value());
+		}
+		return new WolfObj(TokenType.NONE);
+	}
 }
