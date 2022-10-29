@@ -11,7 +11,7 @@ public class InterptrTest {
 	
 	public static void main(String[] args) {
 		String everything = null;
-		try(BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\vigne\\OneDrive\\Desktop\\jwolf-main11\\Wolf\\src\\interptr\\test.wl"))) {
+		try(BufferedReader br = new BufferedReader(new FileReader("<path to test.wl file>\\test.wl"))) {
 		    StringBuilder sb = new StringBuilder();
 		    String line = br.readLine();
 
