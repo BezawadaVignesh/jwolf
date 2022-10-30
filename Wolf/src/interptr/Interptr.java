@@ -2,8 +2,6 @@ package interptr;
 
 import token.TokenType;
 import token.WolfObj;
-import parser.AST;
-import parser.OpType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +25,10 @@ public class Interptr {
 		switch(t.get_op().type) {
 		case PLUS:
 			return interptr(t.get_left()).add(interptr(t.get_right()));
+		case AND:
+			return interptr(t.get_left()).and(interptr(t.get_right()));
+		case OR:
+			return interptr(t.get_left()).or(interptr(t.get_right()));
 		case MINUS:
 			return interptr(t.get_left()).sub(interptr(t.get_right()));
 		case MUL:
@@ -43,8 +45,10 @@ public class Interptr {
 			return interptr(t.get_right()).comLessEqual(interptr(t.get_left()));
 		case EQUALEQUAL:
 			return interptr(t.get_left()).comEqual(interptr(t.get_right()));
+		case NOTEQUAL:
+			return (interptr(t.get_left()).comEqual(interptr(t.get_right()))).not();
 		default:
-			System.out.println("End of i_BinOp");
+			System.out.println("End of i_BinOp"+t.get_op().type);
 			assert false:"i_BinOP";
 			return new WolfObj(TokenType.NONE);
 		}
@@ -87,6 +91,10 @@ public class Interptr {
 	WolfObj interptr(AST t) {
 		if(t.type == OpType.ASSIGNOP)
 			return i_AssignOp((parser.AssignOp)t);
+		else if(t.type == OpType.IFBLOCK)
+			return i_IfBlock((parser.ConBlock)t);
+		else if(t.type == OpType.WHILEBLOCK)
+			return i_WhileBlock((parser.ConBlock)t);
 		else if(t.type == OpType.BINOP)
 			return i_BinOp((parser.BinOp)t);
 		else if(t.type == OpType.UNARYOP)
@@ -97,6 +105,28 @@ public class Interptr {
 			assert false: "interptr";
 		return new WolfObj(TokenType.NONE);
 		
+	}
+	WolfObj i_WhileBlock(ConBlock t) {
+		//System.out.println(t.get_stmts());
+		WolfObj obj = interptr(t.get_condition());
+		while(obj.type == TokenType.BOOL && (boolean)obj.get_value()) {
+			for(AST a:t.get_stmts()) {
+				
+				System.out.println(interptr(a));
+			}
+			obj = interptr(t.get_condition());
+		}
+		return new WolfObj(TokenType.NONE);
+	}
+	WolfObj i_IfBlock(ConBlock t) {
+		//System.out.println(t.get_stmts());
+		WolfObj obj = interptr(t.get_condition());
+		if(obj.type == TokenType.BOOL && (boolean)obj.get_value()) {
+			for(AST a:t.get_stmts())
+				System.out.println(interptr(a));
+			
+		}
+		return new WolfObj(TokenType.NONE);
 	}
 	
 	

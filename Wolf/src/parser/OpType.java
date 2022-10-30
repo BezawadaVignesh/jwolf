@@ -5,5 +5,8 @@ public enum OpType {
 	TOKEN,
 	ASSIGNOP,
 	CTOKEN,
-	UNARYOP
+	UNARYOP,
+	
+	IFBLOCK,
+	WHILEBLOCK,
 }
