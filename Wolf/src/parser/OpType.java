@@ -9,4 +9,7 @@ public enum OpType {
 	
 	IFBLOCK,
 	WHILEBLOCK,
+	
+	FUNCDECL,
+	FUNCCALL
 }

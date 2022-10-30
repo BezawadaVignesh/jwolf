@@ -108,6 +108,14 @@ public class Parser{
 		
 		case VAR:
 			eat(TokenType.VAR);
+			if(this.currentToken.get_type() == TokenType.OPENPARN) {
+				
+				eat(TokenType.OPENPARN);
+				ArrayList<AST> tmpArgs = getArgs();
+				eat(TokenType.CLOSEPARN);
+				return new parser.FuncCall((String)tmpToken.get_value(), tmpArgs);
+			}
+			
 			break;
 		case NOT:
 		case MINUS:
@@ -170,6 +178,19 @@ public class Parser{
 		return tmp;
 	}
 	
+	ArrayList<AST> getArgs(){
+		ArrayList<AST> args = new ArrayList<AST>();
+		skip_newline();
+		while(this.currentToken.get_type() != TokenType.CLOSEPARN) {
+			skip_newline();
+			args.add(boolExpr());
+			if(this.currentToken.get_type() == TokenType.COMMA)
+				eat(TokenType.COMMA);
+			else break;
+		}
+		return args;
+	}
+	
 	public AST parse() {
 		skip_newline();
 		if(this.currentToken.get_type() == TokenType.VAR && peekToken().get_type() == TokenType.EQUAL) {
@@ -178,10 +199,12 @@ public class Parser{
 			eat(TokenType.EQUAL);
 			return new parser.AssignOp(n, boolExpr());
 		}
+		
 		switch(this.currentToken.get_type()){
 		case VAR:
 		case INT:
 		case DOUBLE:
+		case CONSTSTR:
 			return boolExpr();
 		case IF:
 			eat(TokenType.IF);
@@ -189,6 +212,23 @@ public class Parser{
 		case WHILE:
 			eat(TokenType.WHILE);
 			return new parser.ConBlock(OpType.WHILEBLOCK, boolExpr(), getBlock());
+		case FUNC:
+			eat(TokenType.FUNC);
+			if(this.currentToken.get_type() != TokenType.VAR)
+				break;
+			String name = (String) this.currentToken.get_value();
+			ArrayList<String> args = new ArrayList<String>();
+			eat(TokenType.VAR);
+			eat(TokenType.OPENPARN);
+			while(this.currentToken.get_type() == TokenType.VAR) {
+				args.add((String) this.currentToken.get_value());
+				eat(TokenType.VAR);
+				if(this.currentToken.get_type() == TokenType.COMMA) {
+					eat(TokenType.COMMA);
+				}else break;
+			}
+			eat(TokenType.CLOSEPARN);
+			return new parser.FuncDecl(name, args, getBlock());
 		}
 		throw new ParserError("Unknown token(parser): "+this.currentToken);
 		

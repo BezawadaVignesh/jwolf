@@ -25,7 +25,7 @@ public class WolfObj {
 	}
 	
 	public String toString() {
-		return "WolfObj( "+this.type+", "+this.get_value()+" )";
+		return ""+this.get_value();//"WolfObj( "+this.type+", "+this.get_value()+" )";
 	}
 	public Object get_value() {
 		return value;
@@ -100,7 +100,7 @@ public class WolfObj {
 				return new WolfObj(TokenType.BOOL, (Double)this.value == (Double)t.get_value());
 		}
 		else if(this.type == TokenType.CONSTSTR && t.get_type() == TokenType.CONSTSTR)
-			return new WolfObj(TokenType.BOOL, (String)this.value == (String)t.get_value());
+			return new WolfObj(TokenType.BOOL, ((String)this.value).equals((String)t.get_value()));
 		else if(this.type == TokenType.BOOL && t.get_type() == TokenType.BOOL)
 			return new WolfObj(TokenType.BOOL, this.value == t.get_value());
 		

@@ -71,6 +71,8 @@ public class Lexer {
 			return new Token(TokenType.BOOL, false);
 		else if(name.equals("while"))
 			return new Token(TokenType.WHILE);
+		else if(name.equals("def"))
+			return new Token(TokenType.FUNC);
 		return new Token(TokenType.VAR, (String)name);
 	}
 	
@@ -136,6 +138,9 @@ public class Lexer {
 				case ':':
 					this.pos++;
 					return new Token(TokenType.COLON);
+				case ',':
+					this.pos++;
+					return new Token(TokenType.COMMA);
 				case '{':
 					this.pos++;
 					return new Token(TokenType.OPENBRACE);
