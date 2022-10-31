@@ -12,7 +12,7 @@ public class InterptrTest {
 
 	
 	public static void main(String[] args) {
-		/*String everything = null;
+		String everything = null;
 		try(BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\vigne\\OneDrive\\Desktop\\jwolf-main11\\Wolf\\src\\interptr\\test.wl"))) {
 		    StringBuilder sb = new StringBuilder();
 		    String line = br.readLine();
@@ -35,7 +35,8 @@ public class InterptrTest {
 		for(parser.AST a: p.getStms()) {
 			//System.out.println(a);
 			i.interptr(a);
-		}*/
+		}
+		/*
 		Scanner sc = new Scanner(System.in);
 		Interptr i = new Interptr();
 		Parser p = new Parser("");
@@ -59,7 +60,7 @@ public class InterptrTest {
 			}catch(RuntimeException e) {
 				System.out.println(e);
 			}
-		}
+		}*/
 	}
 
 }

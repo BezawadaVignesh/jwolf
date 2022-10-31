@@ -1,10 +1,13 @@
 package token;
 
 import token.TokenType; 
+import java.util.ArrayList;
 
 public class WolfObj {
 	public TokenType type;
 	private Object value;
+	
+	
 	
 	public WolfObj(TokenType type, Object value){
 		this.type = type;
@@ -25,6 +28,7 @@ public class WolfObj {
 	}
 	
 	public String toString() {
+		
 		return ""+this.get_value();//"WolfObj( "+this.type+", "+this.get_value()+" )";
 	}
 	public Object get_value() {
@@ -32,6 +36,17 @@ public class WolfObj {
 	}
 	public void set_value(Object value) {
 		this.value = value;
+	}
+	
+	public WolfObj unpack(WolfObj index) {
+		if(this.type == TokenType.LIST || this.type == TokenType.TUPLE || this.type == TokenType.PACKED)
+		return (WolfObj)((ArrayList<WolfObj>)this.value).get((int)index.value);
+		throw new parser.ParserError("Cannot unpack obj of type "+this.type);
+	}
+	public WolfObj unpackByInt(int index) {
+		if(this.type == TokenType.LIST || this.type == TokenType.TUPLE || this.type == TokenType.PACKED)
+		return (WolfObj)((ArrayList<WolfObj>)this.value).get(index);
+		throw new parser.ParserError("Cannot unpack obj of type "+this.type);
 	}
 	
 	public WolfObj add(WolfObj t) {

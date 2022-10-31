@@ -37,7 +37,11 @@ public enum TokenType {
     INT("INT"),
     DOUBLE("DOUBLE"),
     BOOL("BOOL"),
+    TUPLE("TUPLE"),
+    LIST("LIST"),
+    PACKED("PACKED"),
     
+    RETURN("RETURN"),
     FUNC("DEF"),
     TRUE("TRUE"),
     FALSE("FALSE"),

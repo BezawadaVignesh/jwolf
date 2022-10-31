@@ -2,9 +2,11 @@ package token;
 
 public class Var {
 	private String name;
+	private TokenType type;
 	private Object value;
-	 Var(String name, Object value){
+	 Var(String name, TokenType type,Object value){
 		 this.name = name;
+		 this.type = type;
 		 this.value = value;
 	 }
 	
@@ -17,6 +19,14 @@ public class Var {
 	}
 	 
 	public String toString() {
-		return "Var( " + this.name + " )";
+		return "Var( " + this.name + " "+this.value+" )";
+	}
+
+	public TokenType get_type() {
+		return type;
+	}
+
+	public void set_type(TokenType type) {
+		this.type = type;
 	}
 }

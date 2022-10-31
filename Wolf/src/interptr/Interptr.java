@@ -55,8 +55,13 @@ public class Interptr {
 			for(Map<String, Entry<ArrayList<String>, ArrayList<AST>>> scope:this.funcLists) {
 				if(scope.containsKey((String)t.get_name())) {
 					if(scope.get(t.get_name()).getKey().size() == t.get_args().size()) {
-						run_block(scope.get(t.get_name()).getValue());
-						return new WolfObj(TokenType.NONE); 
+						try {
+						return run_block(scope.get(t.get_name()).getValue(), Map.entry(scope.get(t.get_name()).getKey(), t.get_args())); 
+						}catch(interptr.ReturnRequest rtn) {
+							WolfObj o = rtn.get_args();
+							//System.out.println("func call "+o.get_value());
+							return o;
+						}
 					}
 				}
 			}
@@ -112,10 +117,25 @@ public class Interptr {
 	}
 	
 	WolfObj i_AssignOp(parser.AssignOp t) {
+		//System.out.println(t.get_right().type);
 		WolfObj obj = interptr(t.get_right());
 		
-		this.varLists.get(0).put(t.get_name(), obj);
-		return obj;
+		if(obj.type != TokenType.PACKED) {
+			throw new ParserError("Dev Error");
+		}
+		ArrayList<WolfObj> aObj = (ArrayList<WolfObj>)obj.get_value();
+		//System.out.print("\n"+aObj.get(0));
+		if( aObj.size() == 1 && aObj.get(0).type == TokenType.PACKED) {
+			obj = obj.unpackByInt(0);
+		
+		}
+		if(t.get_name().size() == ((ArrayList<WolfObj>)obj.get_value()).size()) {
+			
+			for(int i=0;i<t.get_name().size();i++)
+				this.varLists.get(0).put(t.get_name().get(i), obj.unpackByInt(i));
+		}
+		else throw new parser.ParserError("Cannot assign "+t.get_name()+" = "+obj);
+		return new WolfObj(TokenType.NONE);
 	}
 	
 	WolfObj i_CToken(parser.CToken t) {
@@ -126,7 +146,7 @@ public class Interptr {
 			result = (Double)t.token.get_value();
 		else
 			assert false:"i_CToken()";*/
-		WolfObj wo;
+		
 		if(t.token.get_type() == TokenType.VAR) {
 			for(Map<String, WolfObj> scope:this.varLists) {
 				if(scope.containsKey((String)t.token.get_value())) {
@@ -135,9 +155,20 @@ public class Interptr {
 			}
 			return new WolfObj(TokenType.NONE);
 		}
+		else if(t.token.get_type() == TokenType.LIST) {
+			ArrayList<WolfObj> tmpObj = new ArrayList<WolfObj>();
+			for(AST a: (ArrayList<AST>)t.token.get_value())	
+				tmpObj.add(interptr(a));
+			return new WolfObj(TokenType.LIST, tmpObj);
+		}else if(t.token.get_type() == TokenType.PACKED) {
+			ArrayList<WolfObj> tmpObj = new ArrayList<WolfObj>();
+			for(AST a: (ArrayList<AST>)t.token.get_value())	
+				tmpObj.add(interptr(a));
+			return new WolfObj(TokenType.PACKED, tmpObj);
+		}
 		else
-			wo = new WolfObj(t.token.get_type(), t.token.get_value());
-		return wo;
+			return  new WolfObj(t.token.get_type(), t.token.get_value());
+		
 	}
 	
 	WolfObj interptr(AST t) {
@@ -155,15 +186,40 @@ public class Interptr {
 			return i_CToken((parser.CToken)t);
 		else if(t.type == OpType.FUNCDECL)
 			return i_FuncDecl((parser.FuncDecl)t);
-		else if(t.type == OpType.FUNCCALL) {
+		else if(t.type == OpType.FUNCCALL) 
 			return i_FuncCall((parser.FuncCall)t);
-		}
+		else if(t.type == OpType.UNPACKOP) 
+			return i_UnpackOp((parser.UnpackOp)t);
+		else if(t.type == OpType.RETURNSTMT)
+			return i_ReturnStmt((parser.ReturnStmt) t);
 		else 
 			assert false: "interptr";
 		return new WolfObj(TokenType.NONE);
 		
 	}
 	
+	private WolfObj i_ReturnStmt(ReturnStmt t) {
+		ArrayList<WolfObj> tmpObj = new ArrayList<WolfObj>();
+		for(AST a:t.get_values()) {
+			tmpObj.add(interptr(a));
+		}
+		if(tmpObj.size() == 1) {
+			throw new ReturnRequest("Return ", tmpObj.get(0));
+		}
+		//System.out.println("Return "+tmpObj);
+		throw new ReturnRequest("Return ",new WolfObj(TokenType.PACKED, tmpObj));
+	}
+	WolfObj i_UnpackOp(UnpackOp t) {
+		for(Map<String, WolfObj> scope:this.varLists) {
+			if(scope.containsKey((String)t.get_name())) {
+				WolfObj obj = (WolfObj)scope.get((String)t.get_name());
+				for(int i=0;i<t.get_index().size();i++)
+					obj = obj.unpack(interptr(t.get_index().get(i))); //to change create new
+				return obj;
+			}
+		}
+		throw new ParserError("Undefined Variable "+ t.get_name());
+	}
 	//WolfObj
 	
 	WolfObj i_FuncDecl(parser.FuncDecl t) {
@@ -171,9 +227,17 @@ public class Interptr {
 		return new WolfObj(TokenType.NONE);
 	}
 	 // args should be assigned 
-	WolfObj run_block(ArrayList<AST> stms) {
+	WolfObj run_block(ArrayList<AST> stms, Entry args) {
+		
 		this.varLists.addFirst(new HashMap<String, WolfObj>());
+		ArrayList<String> names = (ArrayList<String>)args.getKey();
+		i_AssignOp(new parser.AssignOp((ArrayList<String>)args.getKey(), new CToken( TokenType.PACKED, (ArrayList<AST>)args.getValue() )));
+		for(int i=0;i<names.size();i++) {
+			
+		}
 		for(AST a:stms) {
+			
+				
 			interptr(a);
 		}
 		this.varLists.removeFirst();
@@ -192,13 +256,16 @@ public class Interptr {
 	}
 	WolfObj i_IfBlock(ConBlock t) {
 		//System.out.println(t.get_stmts());
-		WolfObj obj = interptr(t.get_condition());
+		WolfObj obj = interptr(t.get_condition()), tmpObj = new WolfObj(TokenType.NONE);
 		if(obj.type == TokenType.BOOL && (boolean)obj.get_value()) {
-			for(AST a:t.get_stmts())
+			for(AST a:t.get_stmts()) {
+				
+					
 				interptr(a);
+			}
 			
 		}
-		return new WolfObj(TokenType.NONE);
+		return tmpObj;
 	}
 	
 	

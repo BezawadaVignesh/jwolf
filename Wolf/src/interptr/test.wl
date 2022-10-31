@@ -1,5 +1,10 @@
 
-def main(){
-	print("Hello" + " " +"World") 
+def fact(a, b){
+	str = "Hello "
+	str  = str*a
+	return str, b
 }
-main()
+
+a,b= fact(4, 3)
+
+print("a=",a, "b=",b)
