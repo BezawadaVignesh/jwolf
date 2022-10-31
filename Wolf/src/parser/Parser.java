@@ -108,6 +108,7 @@ public class Parser{
 		
 		case VAR:
 			eat(TokenType.VAR);
+			//tmp = new parser.CToken(tmpToken);
 			if(this.currentToken.get_type() == TokenType.OPENPARN) {
 				eat(TokenType.OPENPARN);
 				ArrayList<AST> tmpArgs = getArgs();

@@ -52,7 +52,7 @@ public class Interptr {
 		try {
 			method = c.getDeclaredMethod(t.get_name() , WolfObj.class);
 		} catch (NoSuchMethodException | SecurityException e) {
-			for(Map<String, Entry<ArrayList<String>, ArrayList<AST>>> scope:this.funcLists) {
+			/*for(Map<String, Entry<ArrayList<String>, ArrayList<AST>>> scope:this.funcLists) {
 				if(scope.containsKey((String)t.get_name())) {
 					if(scope.get(t.get_name()).getKey().size() == t.get_args().size()) {
 						try {
@@ -63,6 +63,23 @@ public class Interptr {
 							return o;
 						}
 					}
+				}
+			}*/
+			for(Map<String, WolfObj> scope:this.varLists) {
+				if(scope.containsKey((String)t.get_name())) {
+					if(scope.get((String)t.get_name()).type == TokenType.FUNC) {
+						Entry<ArrayList<String>, ArrayList<AST>> func = (Entry<ArrayList<String>, ArrayList<AST>>)scope.get((String)t.get_name()).get_value();
+						if(func.getKey().size() == t.get_args().size()) {
+							try {
+									return run_block(func.getValue(), Map.entry(func.getKey(), t.get_args())); 
+								}catch(interptr.ReturnRequest rtn) {
+									WolfObj o = rtn.get_args();
+									//System.out.println("func call "+o.get_value());
+									return o;
+								}
+						}
+					}
+					throw new parser.ParserError(t.get_name() +"() is not callable");
 				}
 			}
 			throw new parser.ParserError("No function with name "+t.get_name());
@@ -223,8 +240,13 @@ public class Interptr {
 	//WolfObj
 	
 	WolfObj i_FuncDecl(parser.FuncDecl t) {
+		WolfObj obj = new WolfObj(TokenType.FUNC, Map.entry(t.get_args(), t.get_stms()));
+		this.varLists.get(0).put(t.get_name(), obj);
+		/*
 		this.funcLists.get(0).put(t.get_name(), Map.entry(t.get_args(), t.get_stms()));
+		*/
 		return new WolfObj(TokenType.NONE);
+		
 	}
 	 // args should be assigned 
 	WolfObj run_block(ArrayList<AST> stms, Entry args) {
@@ -258,12 +280,8 @@ public class Interptr {
 		//System.out.println(t.get_stmts());
 		WolfObj obj = interptr(t.get_condition()), tmpObj = new WolfObj(TokenType.NONE);
 		if(obj.type == TokenType.BOOL && (boolean)obj.get_value()) {
-			for(AST a:t.get_stmts()) {
-				
-					
+			for(AST a:t.get_stmts()) 
 				interptr(a);
-			}
-			
 		}
 		return tmpObj;
 	}

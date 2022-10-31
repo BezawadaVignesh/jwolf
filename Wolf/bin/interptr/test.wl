@@ -1,10 +1,9 @@
 
-def fact(a, b){
-	str = "Hello "
-	str  = str*a
-	return str, b
+def func( a){
+	return [1,2,3,4] 
 }
 
-a,b= fact(4, 3)
+a= [1,2,3,4]
 
-print("a=",a, "b=",b)
+a= func
+print(a())
