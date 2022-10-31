@@ -3,24 +3,75 @@ package interptr;
 import token.TokenType;
 import token.WolfObj;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import parser.*;
 
 public class Interptr {
-	private ArrayList<AST> treeList; 
+	private ArrayList<AST> treeList;
 	private LinkedList<Map<String, WolfObj>> varLists = new LinkedList<Map<String, WolfObj>>();
+	private LinkedList<Map<String,Entry<ArrayList<String>, ArrayList<AST>>>> funcLists = new LinkedList<Map<String,Entry<ArrayList<String>, ArrayList<AST>>>>();
 	Interptr(){
 		this.varLists.addFirst(new HashMap<String, WolfObj>());
+		this.funcLists.add(new HashMap<String, Entry<ArrayList<String>, ArrayList<AST>>>());
 		//this.varLists.get(this.varLists.size()-1).put("a", new WolfObj(TokenType.INT, 7));
 	}
 	Interptr(ArrayList<AST> treeList){
 		this.treeList = treeList;
 		this.varLists.addFirst(new HashMap<String, WolfObj>());
+		this.funcLists.add(new HashMap<String, Entry<ArrayList<String>, ArrayList<AST>>>());
 	}
+	
+	WolfObj i_FuncCall(parser.FuncCall t) {
+		//t.get_args().size()/////
+		ArrayList<WolfObj> wargs = new ArrayList<WolfObj>();
+		for(AST a : t.get_args()) {
+			wargs.add(interptr(a));
+		}
+		Class c = null;
+		try {
+			c = Class.forName("interptr.PreDefFunc");
+		} catch (ClassNotFoundException e2) {
+			e2.printStackTrace();
+		}
+	    Object obj = null;
+		try {
+			obj = c.newInstance();
+		} catch (InstantiationException e1) {
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			e1.printStackTrace();
+		}
+	    Method method = null;
+		try {
+			method = c.getDeclaredMethod(t.get_name() , WolfObj.class);
+		} catch (NoSuchMethodException | SecurityException e) {
+			for(Map<String, Entry<ArrayList<String>, ArrayList<AST>>> scope:this.funcLists) {
+				if(scope.containsKey((String)t.get_name())) {
+					if(scope.get(t.get_name()).getKey().size() == t.get_args().size()) {
+						run_block(scope.get(t.get_name()).getValue());
+						return new WolfObj(TokenType.NONE); 
+					}
+				}
+			}
+			throw new parser.ParserError("No function with name "+t.get_name());
+		}
+	    try {
+	    	for(WolfObj a: wargs)
+	    		method.invoke(obj, a);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	    System.out.println();
+	    return new WolfObj(TokenType.NONE);
+	}
+	
 	WolfObj i_BinOp(BinOp t) {
 		switch(t.get_op().type) {
 		case PLUS:
@@ -62,7 +113,8 @@ public class Interptr {
 	
 	WolfObj i_AssignOp(parser.AssignOp t) {
 		WolfObj obj = interptr(t.get_right());
-		this.varLists.get(0).put(t.get_name(), obj); 
+		
+		this.varLists.get(0).put(t.get_name(), obj);
 		return obj;
 	}
 	
@@ -101,19 +153,39 @@ public class Interptr {
 			return i_UnaryOp((parser.UnaryOp)t);
 		else if(t.type == OpType.CTOKEN)
 			return i_CToken((parser.CToken)t);
+		else if(t.type == OpType.FUNCDECL)
+			return i_FuncDecl((parser.FuncDecl)t);
+		else if(t.type == OpType.FUNCCALL) {
+			return i_FuncCall((parser.FuncCall)t);
+		}
 		else 
 			assert false: "interptr";
 		return new WolfObj(TokenType.NONE);
 		
 	}
+	
+	//WolfObj
+	
+	WolfObj i_FuncDecl(parser.FuncDecl t) {
+		this.funcLists.get(0).put(t.get_name(), Map.entry(t.get_args(), t.get_stms()));
+		return new WolfObj(TokenType.NONE);
+	}
+	 // args should be assigned 
+	WolfObj run_block(ArrayList<AST> stms) {
+		this.varLists.addFirst(new HashMap<String, WolfObj>());
+		for(AST a:stms) {
+			interptr(a);
+		}
+		this.varLists.removeFirst();
+		return new WolfObj(TokenType.NONE);
+	}
+	
 	WolfObj i_WhileBlock(ConBlock t) {
 		//System.out.println(t.get_stmts());
 		WolfObj obj = interptr(t.get_condition());
 		while(obj.type == TokenType.BOOL && (boolean)obj.get_value()) {
-			for(AST a:t.get_stmts()) {
-				
-				System.out.println(interptr(a));
-			}
+			for(AST a:t.get_stmts())
+				interptr(a);
 			obj = interptr(t.get_condition());
 		}
 		return new WolfObj(TokenType.NONE);
@@ -123,7 +195,7 @@ public class Interptr {
 		WolfObj obj = interptr(t.get_condition());
 		if(obj.type == TokenType.BOOL && (boolean)obj.get_value()) {
 			for(AST a:t.get_stmts())
-				System.out.println(interptr(a));
+				interptr(a);
 			
 		}
 		return new WolfObj(TokenType.NONE);

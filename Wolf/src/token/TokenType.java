@@ -8,7 +8,7 @@ public enum TokenType {
     DIV("/"),
     
     EQUAL("="),
-    
+    COMMA(","),
     COLON(":"),
     SEMICOLON(";"),
     PERIOD("."),
@@ -38,6 +38,7 @@ public enum TokenType {
     DOUBLE("DOUBLE"),
     BOOL("BOOL"),
     
+    FUNC("DEF"),
     TRUE("TRUE"),
     FALSE("FALSE"),
     IF("IF"),
