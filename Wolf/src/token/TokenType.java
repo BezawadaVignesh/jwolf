@@ -48,6 +48,7 @@ public enum TokenType {
     IF("IF"),
     WHILE("WHILE"),
     
+    TYPE("TYPE"),
     NONE("NONE"),
     EOF("EOF");
 	
@@ -62,5 +63,8 @@ public enum TokenType {
 	
 	void set_typeValue(String str) {
 		this.typeValue = str;
+	}
+	public String toString() {
+		return "<WolfObj '"+this.get_typeValue()+"'>";
 	}
 }
