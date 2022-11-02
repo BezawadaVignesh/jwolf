@@ -1,5 +1,1 @@
-
-def main(){
-	print("Hello" + " " +"World") 
-}
-main()
+print(100000/3)

@@ -1,16 +1,18 @@
 package parser;
 
+import java.util.ArrayList;
+
 public class AssignOp extends AST{
 	private AST right;
-	private String name;
+	private ArrayList<String> name;
 	
-	public AssignOp(String name, AST right) {
+	public AssignOp(ArrayList<String> name, AST right) {
 		super(OpType.ASSIGNOP);
 		this.name = name;
 		this.right = right;
 	}
 	
-	public String get_name() {
+	public ArrayList<String> get_name() {
 		return this.name;
 	}
 	

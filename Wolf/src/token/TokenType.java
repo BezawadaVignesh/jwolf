@@ -37,13 +37,18 @@ public enum TokenType {
     INT("INT"),
     DOUBLE("DOUBLE"),
     BOOL("BOOL"),
+    TUPLE("TUPLE"),
+    LIST("LIST"),
+    PACKED("PACKED"),
     
+    RETURN("RETURN"),
     FUNC("DEF"),
     TRUE("TRUE"),
     FALSE("FALSE"),
     IF("IF"),
     WHILE("WHILE"),
     
+    TYPE("TYPE"),
     NONE("NONE"),
     EOF("EOF");
 	
@@ -58,5 +63,8 @@ public enum TokenType {
 	
 	void set_typeValue(String str) {
 		this.typeValue = str;
+	}
+	public String toString() {
+		return "<WolfObj '"+this.get_typeValue()+"'>";
 	}
 }

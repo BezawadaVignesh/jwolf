@@ -73,6 +73,8 @@ public class Lexer {
 			return new Token(TokenType.WHILE);
 		else if(name.equals("def"))
 			return new Token(TokenType.FUNC);
+		else if(name.equals("return"))
+			return new Token(TokenType.RETURN);
 		return new Token(TokenType.VAR, (String)name);
 	}
 	
@@ -147,6 +149,12 @@ public class Lexer {
 				case '}':
 					this.pos++;
 					return new Token(TokenType.CLOSEBRACE);
+				case '[':
+					this.pos++;
+					return new Token(TokenType.OPENBRACKET);
+				case ']':
+					this.pos++;
+					return new Token(TokenType.CLOSEBRACKET);
 				case '=':
 					
 					if(peek() == '=') {

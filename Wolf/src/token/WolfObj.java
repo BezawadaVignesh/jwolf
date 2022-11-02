@@ -1,10 +1,13 @@
 package token;
 
 import token.TokenType; 
+import java.util.ArrayList;
 
 public class WolfObj {
 	public TokenType type;
 	private Object value;
+	
+	
 	
 	public WolfObj(TokenType type, Object value){
 		this.type = type;
@@ -34,20 +37,40 @@ public class WolfObj {
 		this.value = value;
 	}
 	
+	public WolfObj unpack(WolfObj index) {
+		if(this.type == TokenType.LIST || this.type == TokenType.TUPLE || this.type == TokenType.PACKED)
+		return (WolfObj)((ArrayList<WolfObj>)this.value).get((int)index.value);
+		throw new parser.ParserError("Cannot unpack obj of type "+this.type);
+	}
+	public WolfObj unpackByInt(int index) {
+		if(this.type == TokenType.LIST || this.type == TokenType.TUPLE || this.type == TokenType.PACKED)
+		return (WolfObj)((ArrayList<WolfObj>)this.value).get(index);
+		throw new parser.ParserError("Cannot unpack obj of type "+this.type);
+	}
+	
 	public WolfObj add(WolfObj t) {
-		if(this.type == TokenType.INT && t.get_type() == TokenType.INT) {
-			return new WolfObj(TokenType.INT, (Integer)this.value + (Integer)t.get_value());
-		}
-		else if((this.type == TokenType.INT || this.type == TokenType.DOUBLE) 
-				&& (t.get_type() == TokenType.INT || t.get_type() == TokenType.DOUBLE)) {
-			return new WolfObj(TokenType.DOUBLE, (Double)this.value + (Double)t.get_value());
+		if(this.type == TokenType.INT ) {
+			if(t.get_type() == TokenType.INT)
+				return new WolfObj(TokenType.INT, (Integer)this.value + (Integer)t.get_value());
+			else if(t.get_type() == TokenType.DOUBLE)
+				return new WolfObj(TokenType.DOUBLE, (Integer)this.value + (Double)t.get_value());
+			
+		}else if(this.type == TokenType.DOUBLE) {
+			if(this.type == TokenType.INT)
+				return new WolfObj(TokenType.DOUBLE, (Double)this.value + (Integer)t.get_value());
+			else if(this.type == TokenType.DOUBLE)
+				return new WolfObj(TokenType.DOUBLE, (Double)this.value + (Double)t.get_value());
+			
 		}
 		else if(this.type == TokenType.CONSTSTR && t.get_type() == TokenType.CONSTSTR)
 			return new WolfObj(TokenType.CONSTSTR, (String)this.value + (String)t.get_value());
-		else {
-			assert false: "addition of invalid type";
-			return new WolfObj(TokenType.NONE);
+		else if(this.type == TokenType.LIST && t.get_type() == TokenType.LIST) {
+			ArrayList<WolfObj> tmpObj = (ArrayList<WolfObj>) ((ArrayList<WolfObj>)this.value).clone();
+			tmpObj.addAll((ArrayList<WolfObj>)t.get_value());
+			return new WolfObj(TokenType.LIST, tmpObj);
 		}
+			throw new parser.ParserError("addition not possible");
+		
 	}
 	
 	public WolfObj comLess(WolfObj t) {
@@ -109,48 +132,66 @@ public class WolfObj {
 	}
 	
 	public WolfObj sub(WolfObj t) {
-		if(this.type == TokenType.INT && t.get_type() == TokenType.INT) {
-			return new WolfObj(TokenType.INT, (Integer)this.value - (Integer)t.get_value());
+		if(this.type == TokenType.INT ) {
+			if(t.get_type() == TokenType.INT)
+				return new WolfObj(TokenType.INT, (Integer)this.value - (Integer)t.get_value());
+			else if(t.get_type() == TokenType.DOUBLE)
+				return new WolfObj(TokenType.DOUBLE, (Integer)this.value - (Double)t.get_value());
+			
+		}else if(this.type == TokenType.DOUBLE) {
+			if(this.type == TokenType.INT)
+				return new WolfObj(TokenType.DOUBLE, (Double)this.value - (Integer)t.get_value());
+			else if(this.type == TokenType.DOUBLE)
+				return new WolfObj(TokenType.DOUBLE, (Double)this.value - (Double)t.get_value());
+			
 		}
-		else if((this.type == TokenType.INT || this.type == TokenType.DOUBLE) 
-				&& (t.get_type() == TokenType.INT || t.get_type() == TokenType.DOUBLE)) {
-			return new WolfObj(TokenType.DOUBLE, (Double)this.value - (Double)t.get_value());
-		}else {
 			assert false: "addition of invalid type";
 			return new WolfObj(TokenType.NONE);
-		}
+		
 	}
 	
 	public WolfObj mul(WolfObj t) {
-		if(this.type == TokenType.INT && t.get_type() == TokenType.INT) {
-			return new WolfObj(TokenType.INT, (Integer)this.value * (Integer)t.get_value());
+		if(this.type == TokenType.INT ) {
+			if(t.get_type() == TokenType.INT)
+				return new WolfObj(TokenType.INT, (Integer)this.value * (Integer)t.get_value());
+			else if(t.get_type() == TokenType.DOUBLE)
+				return new WolfObj(TokenType.DOUBLE, (Integer)this.value * (Double)t.get_value());
+			
+		}else if(this.type == TokenType.DOUBLE) {
+			if(this.type == TokenType.INT)
+				return new WolfObj(TokenType.DOUBLE, (Double)this.value * (Integer)t.get_value());
+			else if(this.type == TokenType.DOUBLE)
+				return new WolfObj(TokenType.DOUBLE, (Double)this.value * (Double)t.get_value());
+			
 		}
-		else if((this.type == TokenType.INT || this.type == TokenType.DOUBLE) 
-				&& (t.get_type() == TokenType.INT || t.get_type() == TokenType.DOUBLE)) {
-			return new WolfObj(TokenType.DOUBLE, (Double)this.value * (Double)t.get_value());
-		}else if(this.type == TokenType.CONSTSTR && t.get_type() == TokenType.INT) {
+		if(this.type == TokenType.CONSTSTR && t.get_type() == TokenType.INT) {
 			String s=(String)this.value; 
 			for(int i=1;i<(Integer)t.get_value();i++) {
 				s+=this.value;
 			}
 			return new WolfObj(TokenType.CONSTSTR, s );
 		
-		}else {
-			assert false: "addition of invalid type";
-			return new WolfObj(TokenType.NONE);
 		}
+			throw new parser.ParserError("sub of invalid type");
+		
 	}
 	public WolfObj div(WolfObj t) {
-		if(this.type == TokenType.INT && t.get_type() == TokenType.INT) {
-			return new WolfObj(TokenType.INT, (Integer)this.value / (Integer)t.get_value());
+		if(this.type == TokenType.INT ) {
+			if(t.get_type() == TokenType.INT)
+				return new WolfObj(TokenType.DOUBLE, Double.valueOf((Integer)this.value) / (Integer)t.get_value());
+			else if(t.get_type() == TokenType.DOUBLE)
+				return new WolfObj(TokenType.DOUBLE, (Integer)this.value / (Double)t.get_value());
+			
+		}else if(this.type == TokenType.DOUBLE) {
+			if(this.type == TokenType.INT)
+				return new WolfObj(TokenType.DOUBLE, (Double)this.value / (Integer)t.get_value());
+			else if(this.type == TokenType.DOUBLE)
+				return new WolfObj(TokenType.DOUBLE, (Double)this.value / (Double)t.get_value());
+			
 		}
-		else if((this.type == TokenType.INT || this.type == TokenType.DOUBLE) 
-				&& (t.get_type() == TokenType.INT || t.get_type() == TokenType.DOUBLE)) {
-			return new WolfObj(TokenType.DOUBLE, (Double)this.value / (Double)t.get_value());
-		}else {
 			assert false: "addition of invalid type";
 			return new WolfObj(TokenType.NONE);
-		}
+		
 	}
 	
 	public WolfObj and(WolfObj t) {
