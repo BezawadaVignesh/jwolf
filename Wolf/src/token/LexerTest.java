@@ -2,7 +2,7 @@ package token;
 import token.Lexer;
 
 public class LexerTest {
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		Lexer l = new Lexer("a print(' Hello ') 22 + 22.55");
 		Token t=null;
 		do {
@@ -20,5 +20,5 @@ public class LexerTest {
 			//System.out.println(l.get_nextToken());
 		}while(t.type != TokenType.EOF);
 		
-	}
+	}*/
 }

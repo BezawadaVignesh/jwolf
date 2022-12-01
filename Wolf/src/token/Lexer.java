@@ -155,6 +155,9 @@ public class Lexer {
 				case ']':
 					this.pos++;
 					return new Token(TokenType.CLOSEBRACKET);
+				case '.':
+					this.pos++;
+					return new Token(TokenType.PERIOD);
 				case '=':
 					
 					if(peek() == '=') {

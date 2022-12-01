@@ -107,13 +107,15 @@ public class Parser{
 			break;
 		
 		case VAR:
+			return factor_string();/*
 			eat(TokenType.VAR);
 			//tmp = new parser.CToken(tmpToken);
 			if(this.currentToken.get_type() == TokenType.OPENPARN) {
-				eat(TokenType.OPENPARN);
+				return factor_string();
+				/*eat(TokenType.OPENPARN);
 				ArrayList<AST> tmpArgs = getArgs();
 				eat(TokenType.CLOSEPARN);
-				return new parser.FuncCall((String)tmpToken.get_value(), tmpArgs);
+				return new parser.FuncCall(new parser.CToken(tmpToken), tmpArgs);
 			}
 			else if(this.currentToken.get_type() == TokenType.OPENBRACKET) {
 				ArrayList<AST> tmpindex = new ArrayList<AST>();
@@ -123,9 +125,8 @@ public class Parser{
 					eat(TokenType.CLOSEBRACKET);
 				}
 				return new parser.UnpackOp((String)tmpToken.get_value(), tmpindex);
-			}
+			}*/
 			
-			break;
 		case NOT:
 		case MINUS:
 		case PLUS:
@@ -148,6 +149,45 @@ public class Parser{
 		
 		}
 		return new parser.CToken(tmpToken);
+	}
+	
+	AST factor_string() {
+		AST node = new parser.CToken(this.currentToken);
+		eat(TokenType.VAR);
+		Token tmpToken;
+		
+		/*while(this.currentToken.get_type() == TokenType.PERIOD) {
+			
+		}*/
+		while(this.currentToken.get_type() == TokenType.OPENPARN 
+				|| this.currentToken.get_type() == TokenType.OPENBRACKET 
+				|| this.currentToken.get_type() == TokenType.PERIOD) {
+			switch(this.currentToken.get_type()) {
+			case OPENPARN:
+				eat(TokenType.OPENPARN);
+				ArrayList<AST> tmpArgs = getArgs();
+				eat(TokenType.CLOSEPARN);
+				node = new parser.FuncCall(node, tmpArgs);
+				break;
+			case OPENBRACKET:
+				AST tmpindex;
+				//while(this.currentToken.get_type() == TokenType.OPENBRACKET) {
+					eat(TokenType.OPENBRACKET);
+					tmpindex = boolExpr();
+					eat(TokenType.CLOSEBRACKET);
+				
+				node = new parser.UnpackOp(node, tmpindex);
+				break;
+			case PERIOD:
+				tmpToken = new Token(this.currentToken);
+				eat(TokenType.PERIOD);
+				AST tmpv = factor_string();
+				System.out.println(tmpv);
+				node = new parser.BinOp(node, tmpToken, tmpv);
+			}
+			
+		}
+		return node;
 	}
 	
 	Token peekToken() {

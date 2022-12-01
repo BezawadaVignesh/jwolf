@@ -43,6 +43,7 @@ public enum TokenType {
     
     RETURN("RETURN"),
     FUNC("DEF"),
+    CLASS("CLASS"),
     TRUE("TRUE"),
     FALSE("FALSE"),
     IF("IF"),

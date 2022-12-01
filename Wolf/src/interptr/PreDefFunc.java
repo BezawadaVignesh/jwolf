@@ -8,8 +8,8 @@ import token.WolfObj;
 
 public class PreDefFunc {
 	public WolfObj print(WolfObj wobj) {
-		if(wobj.type == TokenType.PACKED) {
-			ArrayList<WolfObj> objs = (ArrayList<WolfObj>)wobj.get_value();
+		if(wobj.getType() == TokenType.PACKED) {
+			ArrayList<WolfObj> objs = (ArrayList<WolfObj>)wobj.getValue();
 			for(WolfObj obj : objs)
 				System.out.print(obj);
 		}
@@ -21,25 +21,27 @@ public class PreDefFunc {
 	public WolfObj input(WolfObj wobj) {
 		print(wobj);
 		Scanner sc = new Scanner(System.in);
-		return new WolfObj(TokenType.CONSTSTR, sc.nextLine());
+		String str = sc.nextLine();
+		sc.close();
+		return new WolfObj(TokenType.CONSTSTR, str);
 	}
 	public WolfObj type(WolfObj wobj) {
-		if(wobj.type == TokenType.PACKED) {
-			ArrayList<WolfObj> objs = (ArrayList<WolfObj>)wobj.get_value();
+		if(wobj.getType() == TokenType.PACKED) {
+			ArrayList<WolfObj> objs = (ArrayList<WolfObj>)wobj.getValue();
 			if(objs.size() == 1)
-				return new WolfObj(TokenType.TYPE, objs.get(0).type);
+				return new WolfObj(TokenType.TYPE, objs.get(0).getType());
 		}
 		throw new parser.ParserError("Required only one args");
 	}
 	
 	public WolfObj integer(WolfObj wobj) {
-		if(wobj.type != TokenType.PACKED)
+		if(wobj.getType() != TokenType.PACKED)
 			throw new parser.ParserError("Dev ERROR");
-		ArrayList<WolfObj> objs = (ArrayList<WolfObj>)wobj.get_value();
+		ArrayList<WolfObj> objs = (ArrayList<WolfObj>)wobj.getValue();
 		if(objs.size() == 1) {
 			WolfObj obj = objs.get(0);
-			if(obj.get_type() == TokenType.CONSTSTR) {
-				return new WolfObj(TokenType.INT, Integer.parseInt((String)obj.get_value()));
+			if(obj.getType() == TokenType.CONSTSTR) {
+				return new WolfObj(TokenType.INT, Integer.parseInt((String)obj.getValue()));
 			}
 			throw new parser.ParserError("Cannot convert to int");
 		}

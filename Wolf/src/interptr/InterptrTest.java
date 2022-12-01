@@ -30,11 +30,12 @@ public class InterptrTest {
 		    //System.out.println(everything);
 			parser.Parser p = new parser.Parser(everything);
 			
+			
 			Interptr i = new Interptr();
 			p.callFirst();
-			
+			//System.out.println("Parsing complete ");
 			for(parser.AST a: p.getStms()) {
-				//System.out.println(a);
+				
 				i.interptr(a);
 			}
 		}
