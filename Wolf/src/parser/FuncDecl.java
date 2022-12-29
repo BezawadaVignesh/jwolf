@@ -5,8 +5,8 @@ import java.util.ArrayList;
 public class FuncDecl extends AST{
 	private ArrayList<AST>  stms;
 	private String name;
-	private ArrayList<String> args;
-	FuncDecl(String name, ArrayList<String> args, ArrayList<AST> stms) {
+	private ArrayList<AST> args;
+	FuncDecl(String name, ArrayList<AST> args, ArrayList<AST> stms) {
 		super(OpType.FUNCDECL);
 		this.set_name(name);
 		this.set_args(args);
@@ -18,10 +18,10 @@ public class FuncDecl extends AST{
 	public void set_name(String name) {
 		this.name = name;
 	}
-	public ArrayList<String> get_args() {
+	public ArrayList<AST> get_args() {
 		return args;
 	}
-	public void set_args(ArrayList<String> args) {
+	public void set_args(ArrayList<AST> args) {
 		this.args = args;
 	}
 	public ArrayList<AST> get_stms() {

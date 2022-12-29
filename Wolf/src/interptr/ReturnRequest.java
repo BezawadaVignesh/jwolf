@@ -1,17 +1,19 @@
 package interptr;
 
 import java.util.ArrayList;
+import wolfObj.WolfObj;
+
 
 public class ReturnRequest extends RuntimeException{
-	private token.WolfObj args;
-	public ReturnRequest(String msg, token.WolfObj objs) {
+	private WolfObj args;
+	public ReturnRequest(String msg, WolfObj objs) {
 		super(msg);
 		this.set_args(objs);
 	}
-	public token.WolfObj get_args() {
+	public WolfObj get_args() {
 		return args;
 	}
-	public void set_args(token.WolfObj args) {
+	public void set_args(WolfObj args) {
 		this.args = args;
 	}
 }

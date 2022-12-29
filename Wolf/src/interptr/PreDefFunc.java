@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import token.TokenType;
-import token.WolfObj;
+import wolfObj.*;
+import wolfObj.WolfObj;
 
 public class PreDefFunc {
 	public WolfObj print(WolfObj wobj) {
@@ -16,6 +17,7 @@ public class PreDefFunc {
 		else {
 			System.out.print(wobj);
 		}
+		System.out.println();
 		return new WolfObj(TokenType.NONE);
 	}
 	public WolfObj input(WolfObj wobj) {
@@ -23,7 +25,7 @@ public class PreDefFunc {
 		Scanner sc = new Scanner(System.in);
 		String str = sc.nextLine();
 		sc.close();
-		return new WolfObj(TokenType.CONSTSTR, str);
+		return new WString(str);
 	}
 	public WolfObj type(WolfObj wobj) {
 		if(wobj.getType() == TokenType.PACKED) {
@@ -41,7 +43,7 @@ public class PreDefFunc {
 		if(objs.size() == 1) {
 			WolfObj obj = objs.get(0);
 			if(obj.getType() == TokenType.CONSTSTR) {
-				return new WolfObj(TokenType.INT, Integer.parseInt((String)obj.getValue()));
+				return new WInt(Integer.parseInt((String)obj.getValue()));
 			}
 			throw new parser.ParserError("Cannot convert to int");
 		}

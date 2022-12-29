@@ -4,15 +4,15 @@ import java.util.ArrayList;
 
 public class AssignOp extends AST{
 	private AST right;
-	private ArrayList<String> name;
+	private ArrayList<AST> name;
 	
-	public AssignOp(ArrayList<String> name, AST right) {
+	public AssignOp(ArrayList<AST> name, AST right) {
 		super(OpType.ASSIGNOP);
 		this.name = name;
 		this.right = right;
 	}
 	
-	public ArrayList<String> get_name() {
+	public ArrayList<AST> get_name() {
 		return this.name;
 	}
 	

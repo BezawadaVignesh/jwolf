@@ -15,6 +15,7 @@ public class WDouble extends WolfObj{
 			return new WDouble((double)this.getValue() + (double)obj.getValue());
 		return super.add(obj);
 	}
+	
 	public WolfObj sub(WolfObj obj) {
 		if(obj.getType() == TokenType.INT)
 			return new WDouble((double)this.getValue() - (int)obj.getValue());
@@ -22,6 +23,7 @@ public class WDouble extends WolfObj{
 			return new WDouble((double)this.getValue() - (double)obj.getValue());
 		return super.sub(obj);
 	}
+	
 	public WolfObj mul(WolfObj obj) {
 		if(obj.getType() == TokenType.INT)
 			return new WDouble((double)this.getValue() * (int)obj.getValue());
@@ -29,6 +31,7 @@ public class WDouble extends WolfObj{
 			return new WDouble((double)this.getValue() * (double)obj.getValue());
 		return super.mul(obj);
 	}
+	
 	public WolfObj div(WolfObj obj) {
 		if(obj.getType() == TokenType.INT)
 			return new WDouble((double)this.getValue() / (int)obj.getValue());
@@ -36,6 +39,7 @@ public class WDouble extends WolfObj{
 			return new WDouble((double)this.getValue() / (double)obj.getValue());
 		return super.div(obj);
 	}
+	
 	public WolfObj and(WolfObj obj) {
 		if(obj.getType() == TokenType.INT)
 			return new WBool((double)this.getValue() != 0 && (int)obj.getValue() != 0);

@@ -6,6 +6,7 @@ public enum TokenType {
     MINUS("-"),
     MUL("*"),
     DIV("/"),
+    MODLUS("%"),
     
     EQUAL("="),
     COMMA(","),
@@ -39,10 +40,13 @@ public enum TokenType {
     BOOL("BOOL"),
     TUPLE("TUPLE"),
     LIST("LIST"),
+    DICT("DICT"),
+    SET("SET"),
     PACKED("PACKED"),
     
     RETURN("RETURN"),
     FUNC("DEF"),
+    JFUNC("JFUNC"),
     CLASS("CLASS"),
     TRUE("TRUE"),
     FALSE("FALSE"),

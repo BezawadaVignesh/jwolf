@@ -32,5 +32,8 @@ public class WBool extends WolfObj{
 			
 		throw new ParserError("Cannot or error..");
 	}
+	public String toString() {
+		return (boolean)this.getValue()?"True":"False";
+	}
 
 }

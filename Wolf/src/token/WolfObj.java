@@ -53,14 +53,17 @@ public class WolfObj {
 		if(tmpObj != null) return tmpObj;
 		throw new parser.ParserError("No attribute name ");
 	}
+	
 	public void setProperties(HashMap<String, WolfObj> obj) {
 		this.properties = obj;
 	}
+	
 	public WolfObj unpack(WolfObj index) {
 		if(this.type == TokenType.LIST || this.type == TokenType.TUPLE || this.type == TokenType.PACKED)
 		return (WolfObj)((ArrayList<WolfObj>)this.value).get((int)index.value);
 		throw new parser.ParserError("Cannot unpack obj of type "+this.type);
 	}
+	
 	public WolfObj unpackByInt(int index) {
 		if(this.type == TokenType.LIST || this.type == TokenType.TUPLE || this.type == TokenType.PACKED)
 		return (WolfObj)((ArrayList<WolfObj>)this.value).get(index);
@@ -192,6 +195,7 @@ public class WolfObj {
 		throw new parser.ParserError("Cannot sub obj of type "+this.type +" and "+t.getType());
 		
 	}
+	
 	public WolfObj div(WolfObj t) {
 		if(this.type == TokenType.INT ) {
 			if(t.getType() == TokenType.INT)
@@ -216,6 +220,7 @@ public class WolfObj {
 		}
 		return new WolfObj(TokenType.NONE);
 	}
+	
 	public WolfObj not() {
 		if(this.type == TokenType.BOOL) {
 			return new WolfObj(TokenType.BOOL, !((boolean)this.value));
@@ -223,6 +228,7 @@ public class WolfObj {
 		//System.out.println()
 		return new WolfObj(TokenType.NONE);
 	}
+	
 	public WolfObj or(WolfObj t) {
 		if(this.type == TokenType.BOOL && t.getType() == TokenType.BOOL) {
 			return new WolfObj(TokenType.BOOL, (boolean)this.value || (boolean)t.getValue());

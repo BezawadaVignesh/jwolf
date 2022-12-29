@@ -12,7 +12,7 @@ public enum OpType {
 	IFBLOCK,
 	WHILEBLOCK,
 	
-	
+	CLASSDECL,
 	
 	FUNCDECL,
 	FUNCCALL

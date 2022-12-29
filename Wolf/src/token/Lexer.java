@@ -73,6 +73,8 @@ public class Lexer {
 			return new Token(TokenType.WHILE);
 		else if(name.equals("def"))
 			return new Token(TokenType.FUNC);
+		else if(name.equals("class"))
+			return new Token(TokenType.CLASS);
 		else if(name.equals("return"))
 			return new Token(TokenType.RETURN);
 		return new Token(TokenType.VAR, (String)name);
@@ -128,6 +130,9 @@ public class Lexer {
 				case '/':
 					this.pos++;
 					return new Token(TokenType.DIV);
+				case '%':
+					this.pos++;
+					return new Token(TokenType.MODLUS);
 				case '(':
 					this.pos++;
 					return new Token(TokenType.OPENPARN);
@@ -195,7 +200,7 @@ public class Lexer {
 					return _constString('\'');
 			}
 			
-			if(Character.isAlphabetic(this.text.charAt(this.pos))) {
+			if(Character.isAlphabetic(this.text.charAt(this.pos)) || this.text.charAt(this.pos) == '_') {
 				return _id();
 			}
 			

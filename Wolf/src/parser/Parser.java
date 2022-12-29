@@ -6,14 +6,19 @@ import token.Lexer;
 import token.LexerError;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import parser.*;
 
 public class Parser{
 	Lexer lexer;
-	Token currentToken;
+	private Token currentToken;
 	public Parser(String text) {
 		this.lexer = new Lexer(text);
+	}
+	
+	public Token getCurrentToken() {
+		return this.currentToken;
 	}
 	
 	public void toParseTxt(String txt) {
@@ -37,7 +42,7 @@ public class Parser{
 		}
 		
 		else{
-			throw new ParserError("EAT ERROR "+this.currentToken.get_type() +" "+ type);
+			throw new ParserError("EAT ERROR got:"+this.currentToken.get_type() +" expected:"+ type);
 		}
 	}
 	
@@ -80,7 +85,8 @@ public class Parser{
 		AST node = factor();
 		Token tmpToken;
 		while(this.currentToken.get_type() == TokenType.DIV 
-				|| this.currentToken.get_type() == TokenType.MUL) {
+				|| this.currentToken.get_type() == TokenType.MUL
+				|| this.currentToken.get_type() == TokenType.MODLUS) {
 			tmpToken = new Token(this.currentToken.get_type());
 			eat(this.currentToken.get_type());
 			node = new parser.BinOp(node,tmpToken, factor());
@@ -107,26 +113,23 @@ public class Parser{
 			break;
 		
 		case VAR:
-			return factor_string();/*
-			eat(TokenType.VAR);
-			//tmp = new parser.CToken(tmpToken);
-			if(this.currentToken.get_type() == TokenType.OPENPARN) {
-				return factor_string();
-				/*eat(TokenType.OPENPARN);
-				ArrayList<AST> tmpArgs = getArgs();
-				eat(TokenType.CLOSEPARN);
-				return new parser.FuncCall(new parser.CToken(tmpToken), tmpArgs);
+			return factor_string();
+		case OPENBRACE:
+			ArrayList<AST> keys = new ArrayList<AST>(),values = new ArrayList<AST>();
+			eat(TokenType.OPENBRACE);skip_newline();
+			while(this.currentToken.get_type() != TokenType.EOF 
+					&& this.currentToken.get_type() != TokenType.CLOSEBRACE) {
+				skip_newline();
+				keys.add(boolExpr());skip_newline();
+				eat(TokenType.COLON);skip_newline();
+				values.add(boolExpr());skip_newline();
+				if(this.currentToken.get_type() == TokenType.COMMA)
+				eat(TokenType.COMMA);
+				else break;
 			}
-			else if(this.currentToken.get_type() == TokenType.OPENBRACKET) {
-				ArrayList<AST> tmpindex = new ArrayList<AST>();
-				while(this.currentToken.get_type() == TokenType.OPENBRACKET) {
-					eat(TokenType.OPENBRACKET);
-					tmpindex.add(boolExpr());
-					eat(TokenType.CLOSEBRACKET);
-				}
-				return new parser.UnpackOp((String)tmpToken.get_value(), tmpindex);
-			}*/
 			
+			eat(TokenType.CLOSEBRACE);
+			return new CToken(TokenType.DICT, Map.entry(keys, values));
 		case NOT:
 		case MINUS:
 		case PLUS:
@@ -144,7 +147,7 @@ public class Parser{
 			eat(TokenType.CLOSEBRACKET);
 			return new CToken( TokenType.LIST, tmpArgs);
 		default:
-			System.out.println("End of factor"+ this.currentToken.get_type()+peekToken());
+			System.out.println("End of factor currentToken : "+ this.currentToken.get_type()+peekToken());
 			assert false;
 		
 		}
@@ -152,42 +155,48 @@ public class Parser{
 	}
 	
 	AST factor_string() {
-		AST node = new parser.CToken(this.currentToken);
-		eat(TokenType.VAR);
+		AST node = deepFactorString();
 		Token tmpToken;
 		
 		/*while(this.currentToken.get_type() == TokenType.PERIOD) {
 			
 		}*/
-		while(this.currentToken.get_type() == TokenType.OPENPARN 
-				|| this.currentToken.get_type() == TokenType.OPENBRACKET 
-				|| this.currentToken.get_type() == TokenType.PERIOD) {
-			switch(this.currentToken.get_type()) {
-			case OPENPARN:
-				eat(TokenType.OPENPARN);
-				ArrayList<AST> tmpArgs = getArgs();
-				eat(TokenType.CLOSEPARN);
-				node = new parser.FuncCall(node, tmpArgs);
-				break;
-			case OPENBRACKET:
-				AST tmpindex;
-				//while(this.currentToken.get_type() == TokenType.OPENBRACKET) {
-					eat(TokenType.OPENBRACKET);
-					tmpindex = boolExpr();
-					eat(TokenType.CLOSEBRACKET);
-				
-				node = new parser.UnpackOp(node, tmpindex);
-				break;
-			case PERIOD:
+		while(this.currentToken.get_type() == TokenType.PERIOD) {
 				tmpToken = new Token(this.currentToken);
 				eat(TokenType.PERIOD);
-				AST tmpv = factor_string();
-				System.out.println(tmpv);
+				AST tmpv = deepFactorString();
+				//System.out.println(tmpv);
 				node = new parser.BinOp(node, tmpToken, tmpv);
 			}
 			
-		}
 		return node;
+	}
+	
+	AST deepFactorString() {
+		AST node = new parser.CToken(this.currentToken);
+		eat(TokenType.VAR);
+		Token tmpToken;
+		while(this.currentToken.get_type() == TokenType.OPENPARN 
+				|| this.currentToken.get_type() == TokenType.OPENBRACKET ) {
+			switch(this.currentToken.get_type()) {
+				case OPENPARN:
+					eat(TokenType.OPENPARN);
+					ArrayList<AST> tmpArgs = getArgs();
+					eat(TokenType.CLOSEPARN);
+					node = new parser.FuncCall(node, tmpArgs);
+					break;
+				case OPENBRACKET:
+					AST tmpindex;
+					//while(this.currentToken.get_type() == TokenType.OPENBRACKET) {
+						eat(TokenType.OPENBRACKET);
+						tmpindex = boolExpr();
+						eat(TokenType.CLOSEBRACKET);
+					
+					node = new parser.UnpackOp(node, tmpindex);
+					break;
+			}
+		}
+			return node;
 	}
 	
 	Token peekToken() {
@@ -208,9 +217,9 @@ public class Parser{
 		while(this.currentToken.get_type() != TokenType.EOF 
 				&& this.currentToken.get_type() != TokenType.CLOSEBRACE) {
 			tmp.add(parse());
-			if(i++>10) {System.out.println("Breaking thi loop"); break;}
+			if(i++>10) {System.out.println("Breaking this loop"); break;}
 			
-			if(this.currentToken.get_type() == TokenType.SEMICOLON )
+			if(this.currentToken.get_type() == TokenType.SEMICOLON)
 				eat(TokenType.SEMICOLON);
 			else if(this.currentToken.get_type() == TokenType.NEWLINE ) {
 				skip_newline();
@@ -245,11 +254,18 @@ public class Parser{
 		return args;
 	}
 	
-	ArrayList<String> getCommaSepNames(){
-		ArrayList<String> args = new ArrayList<String>();
+	ArrayList<AST> getCommaSepNames(){
+		ArrayList<AST> args = new ArrayList<AST>();
+		AST tmpindex;
 		while(this.currentToken.get_type() == TokenType.VAR) {
-			args.add((String) this.currentToken.get_value());
+			tmpindex = new parser.CToken(new Token(TokenType.VAR, this.currentToken.get_value()));
 			eat(TokenType.VAR);
+			if(this.currentToken.get_type() == TokenType.OPENBRACKET) {
+				eat(TokenType.OPENBRACKET);
+				tmpindex = new parser.UnpackOp(tmpindex, boolExpr());
+				eat(TokenType.CLOSEBRACKET);
+			}
+			args.add(tmpindex);
 			if(this.currentToken.get_type() == TokenType.COMMA) {
 				eat(TokenType.COMMA);
 			}else break;
@@ -259,8 +275,11 @@ public class Parser{
 	
 	public AST parse() {
 		skip_newline();
-		if(this.currentToken.get_type() == TokenType.VAR && (peekToken().get_type() == TokenType.EQUAL || peekToken().get_type() == TokenType.COMMA)) {
-			ArrayList<String> n = getCommaSepNames();
+		if(this.currentToken.get_type() == TokenType.VAR 
+				&& (peekToken().get_type() == TokenType.EQUAL 
+				|| peekToken().get_type() == TokenType.COMMA
+				|| peekToken().get_type() == TokenType.OPENBRACKET)) {
+			ArrayList<AST> n = getCommaSepNames();
 			eat(TokenType.EQUAL);
 			return new parser.AssignOp(n, new CToken( TokenType.PACKED, getArgs()));
 		}
@@ -282,6 +301,19 @@ public class Parser{
 			ArrayList<AST> tmpArgs = getArgs();
 			eat(TokenType.CLOSEBRACKET);
 			return new CToken( TokenType.LIST, tmpArgs);
+		case CLASS:
+			eat(TokenType.CLASS);
+			if(this.currentToken.get_type() != TokenType.VAR)
+				break;
+			String name1 = (String) this.currentToken.get_value();
+			
+			eat(TokenType.VAR);/*
+			eat(TokenType.OPENPARN);
+			ArrayList<AST> args1 = getCommaSepNames();
+			eat(TokenType.CLOSEPARN);*/
+			parser.AST tmp = new parser.FuncDecl(name1, new ArrayList<AST>(), getBlock());
+			tmp.type = OpType.CLASSDECL;
+			return tmp;
 		case FUNC:
 			eat(TokenType.FUNC);
 			if(this.currentToken.get_type() != TokenType.VAR)
@@ -290,7 +322,7 @@ public class Parser{
 			
 			eat(TokenType.VAR);
 			eat(TokenType.OPENPARN);
-			ArrayList<String> args = getCommaSepNames();
+			ArrayList<AST> args = getCommaSepNames();
 			eat(TokenType.CLOSEPARN);
 			return new parser.FuncDecl(name, args, getBlock());
 		case RETURN:
